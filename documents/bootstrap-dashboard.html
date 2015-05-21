@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+		<meta name="description" content="labmon">
+		<meta name="author" content="mustafa">
+		<link rel="icon" href="../../favicon.ico">
+
+		<title>LabMon</title>
+
+		<!-- Bootstrap core CSS -->
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+		<!-- Custom styles for this template -->
+		<link href="static/polls/css/dashboard.css" rel="stylesheet">
+		<!--Load the AJAX API-->
+		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+		<script type="text/javascript">
+			var data, options, chart;
+			google.load('visualization', '1', {packages: ['corechart', 'line']});
+			google.setOnLoadCallback(drawBackgroundColor);
+
+			function drawBackgroundColor() {
+				data = new google.visualization.DataTable();
+				data.addColumn('datetime', 'Time of Today');
+				data.addColumn('number', 'Temp');
+				data.addColumn('number', 'Humidity');
+				data.addRows([{{row}}]);
+
+				options = {
+					width: 900,
+					height: 500,
+					legend: {position: 'none'},
+					enableInteractivity: true,
+					chartArea: {
+					  width: '85%'
+					},
+					hAxis: {
+						gridlines: {
+							count: -5,
+							units: {
+								days: {format: ["MMM dd"]},
+								hours: {format: ["HH:mm", "ha"]},
+							}
+						},
+						minorGridlines: {
+							units: {
+								hours: {format: ["hh:mm:ss a", "ha"]},
+								minutes: {format: ["HH:mm a Z", ":mm"]}
+							}
+						}
+					}
+				};
+			}
+			window.onload = function(){
+				chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+				chart.draw(data, options);
+				setInterval(updateGraph, 10000);
+			}
+			function updateGraph(){
+				var xhr = window.XMLHttpRequest?new XMLHttpRequest():(window.ActiveXObject?new ActiveXObject("Microsoft.XMLHTTP"):false);
+				if(xhr){
+					xhr.onreadystatechange = function(){
+						if(xhr.readyState==4 && xhr.status==200){
+							var newrow = xhr.responseText;
+							data.Lf.shift();
+							eval("data.addRow("+newrow+")"); // replace(/\[(.*),\]/g,"$1")
+							chart.draw(data, options);
+							return;
+						}
+					};
+					xhr.open("GET","?limit=1");
+					xhr.send(null);
+				}else{
+					alert("unable to create an XMLHttpRequest");
+				}
+			}
+		</script>
+
+	</head>
+
+	<body>
+
+		<nav class="navbar navbar-inverse navbar-fixed-top">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#">Project name</a>
+				</div>
+				<div id="navbar" class="navbar-collapse collapse">
+					<ul class="nav navbar-nav navbar-right">
+						<li><a href="#">Dashboard</a></li>
+						<li><a href="#">Settings</a></li>
+						<li><a href="#">Profile</a></li>
+						<li><a href="#">Help</a></li>
+					</ul>
+					<form class="navbar-form navbar-right">
+						<input type="text" class="form-control" placeholder="Search...">
+					</form>
+				</div>
+			</div>
+		</nav>
+
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-sm-2 sidebar">
+					<ul class="nav nav-sidebar">
+						<li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
+						<li><a href="#">Reports</a></li>
+						<li><a href="#">Analytics</a></li>
+						<li><a href="#">Export</a></li>
+					</ul>
+				</div>
+				<div class="col-sm-10 main">
+					<h1 class="page-header">Dashboard</h1>
+					<div class="col-md-8">
+						<div class="chart-wrapper">
+							<div class="chart-title">
+								LabMon: Smart Lab Monitoring
+							</div>
+							<div class="chart-stage">
+								<div id="chart_div">
+							</div>
+						</div>
+						<div class="chart-notes">
+							Reading temparature and humidity in real time
+						</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Bootstrap core JavaScript
+		================================================== -->
+		<!-- Placed at the end of the document so the pages load faster -->
+		<!-- jQuery library -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+		<!-- Latest compiled JavaScript -->
+		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	</body>
+</html>
+
