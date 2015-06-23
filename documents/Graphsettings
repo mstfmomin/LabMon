@@ -1,0 +1,59 @@
+import os
+import psycopg2
+import urlparse
+from django.shortcuts import render_to_response
+import datetime
+from django.http import HttpResponse
+import json
+
+
+#Connecting to the Database
+result = urlparse.urlparse("postgres://lfcyvocrprinfv:VZx4A6-62bpWvb_fSxTzO1WglF@ec2-174-129-26-115.compute-1.amazonaws.com:5432/de4mu7op30gi0e")
+username = result.username
+password = result.password
+database = result.path[1:]
+hostname = result.hostname
+
+con = None
+
+
+
+# Create your views here.
+
+def index(request, template_name='polls/index.html'):
+
+	try:
+		con = psycopg2.connect(
+		database = database,
+		user = username,
+		password = password,
+		host = hostname
+		)
+		cur = con.cursor()
+		cur = con.cursor()
+		sql = """
+		 select row_to_json(t)
+		 from (
+		select humidity, temperature, mytimestamp from UID003A
+		 ) t
+		
+		"""
+		cur.execute(sql)  
+		data = json.dumps(cur.fetchall(), indent=4)
+		data= data.replace("[", "").replace("]", "")
+		
+		surtempsql = """
+			 select row_to_json(t)
+			 from (
+			select mytimestamp, surtemp from UID003A
+			 ) t
+			
+			 """
+		cur.execute(surtempsql)
+		surtemp= json.dumps(cur.fetchall(), indent=2)
+		surtemp= surtemp.replace("[", "").replace("]", "")
+	
+	finally:
+		con.close()
+	return render_to_response(template_name, {'data': data,'surtemp':surtemp})
+	
